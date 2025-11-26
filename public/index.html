@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Responsive Sidebar & Navbar</title>
+  <title>Face Recognition Attendance</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -59,6 +59,12 @@
         </li>
       </ul>
     </aside>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center text-white text-xl font-semibold z-50 hidden">
+        <div id="loadingText">Loading...</div>
+        <div class="mt-4 w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+    </div>
 
     <!-- Main content -->
     <main id="content" class="flex-1 ml-0 md:ml-64 p-6 transition-all duration-300">
@@ -171,18 +177,33 @@
       const cooldownPeriod = 5000;
 
       async function fetchProfilesAndModels() {
-        await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
-        await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-        await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
+        try {
+          showLoading("Loading models...");
 
-        const response = await fetch('/get-profiles');
-        const profiles = await response.json();
+          await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+          await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+          await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
 
-        labeledDescriptors = await Promise.all(profiles.map(async person => {
-          const img = await faceapi.fetchImage(`/uploads/${person.image}`);
-          const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-          return new faceapi.LabeledFaceDescriptors(person.name, [detection.descriptor]);
-        }));
+          showLoading("Loading profiles...");
+
+          const response = await fetch('/get-profiles');
+          const profiles = await response.json();
+
+          labeledDescriptors = await Promise.all(profiles.map(async person => {
+            const img = await faceapi.fetchImage(`/uploads/${person.image}`);
+            const detection = await faceapi.detectSingleFace(img)
+              .withFaceLandmarks()
+              .withFaceDescriptor();
+
+            return new faceapi.LabeledFaceDescriptors(person.name, [detection.descriptor]);
+          }));
+
+        } catch (err) {
+          alert("Failed to load models or profiles.");
+          console.error(err);
+        } finally {
+          hideLoading();
+        }
       }
 
       async function startRecognition() {
@@ -265,9 +286,12 @@
       }
 
       document.getElementById('startCameraBtn').addEventListener('click', async () => {
+        showLoading("Preparing camera...");
         await fetchProfilesAndModels();
+        hideLoading();
         startRecognition();
       });
+
 
       document.getElementById('stopCameraBtn').addEventListener('click', () => {
         if(videoStream) {
@@ -277,6 +301,19 @@
           recognitionStarted = false;
         }
       });
+
+      function showLoading(text) {
+        const overlay = document.getElementById("loadingOverlay");
+        const label = document.getElementById("loadingText");
+
+        label.textContent = text;
+        overlay.classList.remove("hidden");
+      }
+
+      function hideLoading() {
+        const overlay = document.getElementById("loadingOverlay");
+        overlay.classList.add("hidden");
+      }
     </script>
 </body>
 </html>
