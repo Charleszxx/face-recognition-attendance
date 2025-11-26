@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Sidebar & Navbar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: {} },
+    };
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<style>
+  #video
+  {
+    border: 1px solid lightblue;
+  }
+
+  /* Allow clicks to pass through by default */
+  #demoOverlay,
+  #paymentMessage {
+    pointer-events: none;
+  }
+
+  /* Only block clicks when showing payment message */
+  #paymentMessage.show {
+    pointer-events: auto;
+  }
+
+  /* Smooth fade-in/out */
+  #paymentMessage {
+    opacity: 0;
+    transition: opacity 1s;
+  }
+</style>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+    <div id="mainContent">
+      <!-- Navbar -->
+      <nav class="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-4 shadow-md">
+        <div class="flex items-center gap-4">
+          <button id="sidebarToggle" class="md:hidden focus:outline-none">
+            <i data-lucide="menu" class="w-6 h-6"></i>
+          </button>
+          <span class="font-bold text-lg">My Dashboard</span>
+        </div>
+        <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+          <i data-lucide="sun" id="lightIcon" class="w-5 h-5 hidden"></i>
+          <i data-lucide="moon" id="darkIcon" class="w-5 h-5"></i>
+        </button>
+      </nav>
+
+      <div class="flex">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 bg-gray-200 dark:bg-gray-800 w-64 p-4 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-lg font-bold">Menu</h2>
+            <button id="sidebarClose" class="md:hidden focus:outline-none">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+          <ul class="space-y-4">
+            <li>
+              <a href="index.html" class="flex items-center gap-2 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
+                <i data-lucide="scan" class="w-5 h-5"></i> Scan
+              </a>
+            </li>
+            <li>
+              <a href="login-dashboard.html" class="flex items-center gap-2 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
+                <i data-lucide="user-circle" class="w-5 h-5"></i> Admin Dashboard
+              </a>
+            </li>
+          </ul>
+        </aside>
+
+        <!-- Main content -->
+        <main id="content" class="flex-1 ml-0 md:ml-64 p-6 transition-all duration-300">
+          <!-- Panels Row -->
+          <div class="flex flex-col md:flex-row gap-6">
+            
+            <!-- Video Scanner Panel -->
+            <div class="panel bg-white dark:bg-gray-800 p-6 rounded-2xl shadow flex-1 flex flex-col fade-in">
+              <!-- Title and hr -->
+              <div class="flex items-center mb-4 gap-2">
+                <i data-lucide="video" class="w-6 h-6"></i>
+                <h2 class="text-xl font-bold">Video Scanner</h2>
+              </div>
+              <hr class="border-gray-300 dark:border-gray-600 mb-4">
+
+              <video id="video" autoplay muted class="w-full rounded-lg border-indigo-500"></video>
+              
+              <!-- Buttons Row -->
+              <div class="flex justify-center gap-4 mt-4">
+                <button id="startCameraBtn" class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+                  <i data-lucide="play" class="w-5 h-5"></i>
+                  Start Camera
+                </button>
+                <button id="stopCameraBtn" class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                  <i data-lucide="stop-circle" class="w-5 h-5"></i>
+                  Stop Camera
+                </button>
+              </div>
+
+              <p class="mt-3 text-gray-500 dark:text-gray-400 text-center">Scan your face here</p>
+            </div>
+
+            <!-- Profile & Attendance Panel -->
+            <div id="profileContainer" class="panel bg-white dark:bg-gray-800 p-6 rounded-2xl shadow flex-1 flex flex-col items-center justify-center gap-4 invisible">
+              <!-- Title and hr -->
+              <div class="flex items-center mb-4 gap-2">
+                <i data-lucide="user" class="w-6 h-6"></i>
+                <h2 class="text-xl font-bold">Profile & Attendance</h2>
+              </div>
+              <hr class="border-gray-300 dark:border-gray-600 mb-4">
+
+              <img id="profileImage" src="user.png" alt="Profile Image" class="w-24 h-24 rounded-full object-cover">
+              <h2 id="profileName" class="text-xl font-semibold"></h2>
+              <p id="attendanceDetails" class="text-gray-600 dark:text-gray-300 text-center"></p>
+            </div>
+
+          </div>
+        </main>
+    </div>
+
+    <!-- Demo Countdown (bottom-right, transparent) -->
+    <div id="demoOverlay" class="fixed bottom-4 right-4 bg-gray-800/30 dark:bg-gray-200/30 text-white dark:text-gray-900 px-4 py-2 rounded-lg backdrop-blur-sm z-50">
+      Demo Mode: <span id="countdown">02:00</span>
+    </div>
+
+    <!-- Final Payment Message -->
+    <div id="paymentMessage" class="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-center text-2xl font-bold opacity-0 transition-opacity duration-1000 z-50">
+      Please pay to the developer to access it full
+    </div>
+
+    <script src="face-api.min.js"></script>
+    <script>
+      lucide.createIcons(); // Initialize lucide icons
+
+      const sidebar = document.getElementById('sidebar');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const sidebarClose = document.getElementById('sidebarClose');
+      const darkModeToggle = document.getElementById('darkModeToggle');
+      const html = document.documentElement;
+      const darkIcon = document.getElementById('darkIcon');
+      const lightIcon = document.getElementById('lightIcon');
+
+      // Sidebar toggle (mobile)
+      sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+      });
+
+      // Sidebar close (desktop + mobile)
+      sidebarClose.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+        const content = document.getElementById('content');
+        if (window.innerWidth >= 768) {
+          if (sidebar.classList.contains('-translate-x-full')) {
+            content.classList.remove('md:ml-64');
+            content.classList.add('md:ml-0');
+          } else {
+            content.classList.remove('md:ml-0');
+            content.classList.add('md:ml-64');
+          }
+        }
+      });
+
+      // Dark/light mode toggle
+      function updateIcons() {
+        if (html.classList.contains('dark')) {
+          darkIcon.classList.add('hidden');
+          lightIcon.classList.remove('hidden');
+        } else {
+          darkIcon.classList.remove('hidden');
+          lightIcon.classList.add('hidden');
+        }
+      }
+
+      darkModeToggle.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        updateIcons();
+      });
+
+      // Preserve theme
+      if (localStorage.getItem('theme') === 'dark') {
+        html.classList.add('dark');
+      }
+      updateIcons();
+
+      // --- Face API & Scanner ---
+      let videoStream = null;
+      let recognitionStarted = false;
+      let labeledDescriptors = [];
+      const scannedUsers = {};
+      const cooldownPeriod = 5000;
+
+      async function fetchProfilesAndModels() {
+        await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+        await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+        await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
+
+        const response = await fetch('/get-profiles');
+        const profiles = await response.json();
+
+        labeledDescriptors = await Promise.all(profiles.map(async person => {
+          const img = await faceapi.fetchImage(`/uploads/${person.image}`);
+          const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+          return new faceapi.LabeledFaceDescriptors(person.name, [detection.descriptor]);
+        }));
+      }
+
+      async function startRecognition() {
+        if (recognitionStarted) return;
+        recognitionStarted = true;
+
+        const video = document.getElementById('video');
+        if (!videoStream) {
+          videoStream = await navigator.mediaDevices.getUserMedia({ video: {} });
+          video.srcObject = videoStream;
+        }
+
+        const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6);
+
+        video.addEventListener('play', () => {
+          const interval = setInterval(async () => {
+            if(!video.videoWidth || !video.videoHeight) return;
+            const detections = await faceapi.detectAllFaces(video).withFaceLandmarks().withFaceDescriptors();
+            const resized = faceapi.resizeResults(detections, { width: video.videoWidth, height: video.videoHeight });
+            resized.forEach(d => {
+              const match = faceMatcher.findBestMatch(d.descriptor);
+              if(match.label !== 'unknown') markAttendance(match.label);
+            });
+          }, 2000);
+        });
+      }
+
+      async function markAttendance(name) {
+        if(scannedUsers[name] && Date.now() - scannedUsers[name] < cooldownPeriod) return;
+        scannedUsers[name] = Date.now();
+
+        try {
+          const markRes = await fetch(`/mark-attendance?name=${encodeURIComponent(name)}`);
+          const text = await markRes.text();
+
+          // Check if attendance already exists
+          if (text.includes("Error") || text.includes("already")) {
+            // Show error on profile panel
+            const profileContainer = document.getElementById('profileContainer');
+            document.getElementById('profileImage').src = 'user.png';
+            document.getElementById('profileName').textContent = "Error";
+            document.getElementById('attendanceDetails').textContent = "You already made an attendance today.";
+
+            profileContainer.style.visibility = 'visible';
+
+            // Text-to-speech
+            const speech = new SpeechSynthesisUtterance("Error: You already made an attendance today.");
+            window.speechSynthesis.speak(speech);
+
+            setTimeout(() => {
+              profileContainer.style.visibility = 'hidden';
+            }, 10000);
+
+            return; // Stop further processing
+          }
+
+          // Attendance marked successfully
+          const formattedTimestamp = text.replace(`Attendance marked for ${name} at `, '');
+          const profileRes = await fetch(`/get-profile/${encodeURIComponent(name)}`);
+          const profile = await profileRes.json();
+
+          const profileContainer = document.getElementById('profileContainer');
+          document.getElementById('profileImage').src = `/uploads/${profile.image}`;
+          document.getElementById('profileImage').onerror = () => { document.getElementById('profileImage').src = 'user.png'; };
+          document.getElementById('profileName').textContent = name;
+          document.getElementById('attendanceDetails').textContent = `Attendance Time: ${formattedTimestamp}`;
+
+          profileContainer.style.visibility = 'visible';
+
+          const speech = new SpeechSynthesisUtterance(`${name} marked attendance at ${formattedTimestamp}`);
+          window.speechSynthesis.speak(speech);
+
+          setTimeout(() => {
+            profileContainer.style.visibility = 'hidden';
+          }, 10000);
+
+        } catch(err) {
+          console.error(err);
+        }
+      }
+
+      document.getElementById('startCameraBtn').addEventListener('click', async () => {
+        await fetchProfilesAndModels();
+        startRecognition();
+      });
+
+      document.getElementById('stopCameraBtn').addEventListener('click', () => {
+        if(videoStream) {
+          videoStream.getTracks().forEach(track => track.stop());
+          document.getElementById('video').srcObject = null;
+          videoStream = null;
+          recognitionStarted = false;
+        }
+      });
+
+      const mainContent = document.getElementById('mainContent');
+      const countdownEl = document.getElementById('countdown');
+      const demoOverlay = document.getElementById('demoOverlay');
+      const paymentMessage = document.getElementById('paymentMessage');
+
+      let countdownSeconds = 120;
+
+      const countdownInterval = setInterval(() => {
+        const minutes = String(Math.floor(countdownSeconds / 60)).padStart(2, '0');
+        const seconds = String(countdownSeconds % 60).padStart(2, '0');
+        countdownEl.textContent = `${minutes}:${seconds}`;
+
+        // Optional: slightly dim main content (won't block clicks)
+        mainContent.style.opacity = 1 - (120 - countdownSeconds) / 150; // subtle fade
+
+        countdownSeconds--;
+
+        if (countdownSeconds < 0) {
+          clearInterval(countdownInterval);
+
+          // Hide demo overlay
+          demoOverlay.style.display = 'none';
+
+          // Show payment message
+          paymentMessage.classList.add('show');  // now blocks clicks
+          paymentMessage.style.display = 'flex';
+          setTimeout(() => {
+            paymentMessage.style.opacity = 1; // fade in
+          }, 50);
+        }
+      }, 1000);
+
+    </script>
+</body>
+</html>

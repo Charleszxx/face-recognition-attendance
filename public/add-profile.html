@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Sidebar & Navbar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: {} },
+    };
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    #video { border: 1px solid lightblue; }
+    .profile-img { @apply w-48 h-48 rounded-full object-cover mt-4 mx-auto; }
+  </style>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+  <!-- Navbar -->
+  <nav class="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-4 shadow-md fixed w-full z-20">
+    <div class="flex items-center gap-4">
+      <button id="sidebarToggle" class="md:hidden focus:outline-none">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+      <span class="font-bold text-lg">My Dashboard</span>
+    </div>
+    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+      <i data-lucide="sun" id="lightIcon" class="w-5 h-5 hidden"></i>
+      <i data-lucide="moon" id="darkIcon" class="w-5 h-5"></i>
+    </button>
+  </nav>
+
+  <div class="flex pt-16">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 bg-gray-200 dark:bg-gray-800 w-64 p-4 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-bold">Menu</h2>
+        <button id="sidebarClose" class="md:hidden focus:outline-none">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <ul class="space-y-4">
+        <li>
+          <a href="admin.html" class="flex items-center gap-2 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
+            <i data-lucide="user-circle" class="w-5 h-5"></i> Admin Dashboard
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main content -->
+    <main id="content" class="flex-1 ml-0 md:ml-64 p-6 transition-all duration-300">
+      <h2 class="text-center mb-6 text-2xl font-bold">Add Profile</h2>
+      <div class="flex flex-col md:flex-row gap-6">
+        <!-- Left: Form -->
+        <div class="md:w-1/2 bg-gray-100 dark:bg-gray-800 p-6 rounded shadow">
+          <form id="profileForm" action="/upload" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <input type="hidden" name="image" id="capturedImage">
+
+            <div>
+              <label class="block mb-1">Full Name</label>
+              <input type="text" class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700" name="name" required>
+            </div>
+            <div>
+              <label class="block mb-1">Address</label>
+              <input type="text" class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700" name="address" required>
+            </div>
+            <div>
+              <label class="block mb-1">Date of Birth</label>
+              <input type="date" class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700" name="dob" required>
+            </div>
+            <div>
+              <label class="block mb-1">Phone Number</label>
+              <input type="text" class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700" name="phone_number" required>
+            </div>
+            <div>
+              <label class="block mb-1">Role</label>
+              <select class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700" name="role" required>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+                <option value="staff">Staff</option>
+              </select>
+            </div>
+            <div>
+              <label class="block mb-1">Section / Staff Role</label>
+              <input type="text" class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700" name="section_or_staff" required>
+            </div>
+            <div class="text-center">
+              <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Upload</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right: Camera -->
+        <div class="md:w-1/2 text-center bg-gray-100 dark:bg-gray-800 p-6 rounded shadow">
+          <h5 id="status-image" class="mb-4 font-semibold">Live Camera</h5>
+          <video id="video" class="w-full rounded"></video>
+          <canvas id="canvas" style="display:none;"></canvas>
+          <button class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" id="captureBtn">Take Photo</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+    sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
+    sidebarClose.addEventListener('click', () => sidebar.classList.add('-translate-x-full'));
+
+    // Dark mode
+    const html = document.documentElement;
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const darkIcon = document.getElementById('darkIcon');
+    const lightIcon = document.getElementById('lightIcon');
+
+    function updateIcons() {
+      if (html.classList.contains('dark')) {
+        darkIcon.classList.add('hidden');
+        lightIcon.classList.remove('hidden');
+      } else {
+        darkIcon.classList.remove('hidden');
+        lightIcon.classList.add('hidden');
+      }
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+      updateIcons();
+    });
+
+    if (localStorage.getItem('theme') === 'dark') html.classList.add('dark');
+    updateIcons();
+
+    // Camera functionality
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    const form = document.getElementById('profileForm');
+    const capturedImage = document.getElementById('capturedImage');
+    const statusImage = document.getElementById('status-image');
+    let capturedBlob = null;
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+        video.play(); // Important: ensure the video actually starts
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Cannot access camera. Please allow camera permission.");
+      });
+
+    // Wait for video metadata before capturing (ensures width/height are available)
+    captureBtn.addEventListener('click', () => {
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        alert("Video not ready yet. Please wait a moment and try again.");
+        return;
+      }
+
+      const context = canvas.getContext('2d');
+      const size = 1080;
+      canvas.width = size;
+      canvas.height = size;
+
+      const videoAspect = video.videoWidth / video.videoHeight;
+      let sx, sy, sWidth, sHeight;
+
+      if (videoAspect > 1) {
+        sHeight = video.videoHeight;
+        sWidth = video.videoHeight;
+        sx = (video.videoWidth - sWidth) / 2;
+        sy = 0;
+      } else {
+        sWidth = video.videoWidth;
+        sHeight = video.videoWidth;
+        sx = 0;
+        sy = (video.videoHeight - sHeight) / 2;
+      }
+
+      context.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, size, size);
+
+      canvas.toBlob(blob => {
+        capturedBlob = blob;
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(blob);
+        img.classList.add('profile-img');
+        document.querySelector('.md\\:w-1\\/2.text-center').appendChild(img);
+
+        captureBtn.style.display = 'none';
+        video.style.display = 'none';
+        statusImage.textContent = 'Image Captured:';
+        capturedImage.value = img.src;
+      }, 'image/png');
+    });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      if (!capturedBlob) return alert("Please take a photo first.");
+      const formData = new FormData(form);
+      const filename = `${formData.get("name").toLowerCase().replace(/\s+/g,'_')}.png`;
+      formData.append('image', capturedBlob, filename);
+      fetch('/upload', { method: 'POST', body: formData })
+        .then(res => res.ok ? location.reload() : alert("Upload failed"));
+    });
+  </script>
+</body>
+</html>

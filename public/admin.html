@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: {} },
+    };
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+  <!-- Navbar -->
+  <nav class="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-4 shadow-md fixed w-full z-20">
+    <div class="flex items-center gap-4">
+      <button id="sidebarToggle" class="md:hidden focus:outline-none">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+      <span class="font-bold text-lg">My Dashboard</span>
+    </div>
+    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+      <i data-lucide="sun" id="lightIcon" class="w-5 h-5 hidden"></i>
+      <i data-lucide="moon" id="darkIcon" class="w-5 h-5"></i>
+    </button>
+  </nav>
+
+  <div class="flex pt-16">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 bg-gray-200 dark:bg-gray-800 w-64 p-4 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-bold">Menu</h2>
+        <button id="sidebarClose" class="md:hidden focus:outline-none">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <ul class="space-y-4">
+        <li>
+          <a href="add-profile.html" class="flex items-center gap-2 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
+            <i data-lucide="user-plus" class="w-5 h-5"></i> Add Profile
+          </a>
+        </li>
+        <li>
+          <a href="index.html" class="flex items-center gap-2 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
+            <i data-lucide="scan" class="w-5 h-5"></i> Scan
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main content -->
+    <main id="content" class="flex-1 ml-0 md:ml-64 p-6 overflow-y-auto h-[calc(100vh-4rem)]">
+
+      <!-- Users Panel -->
+      <div class="panel bg-white dark:bg-gray-800 p-6 rounded-2xl shadow mb-6">
+        <div class="flex items-center gap-2 mb-4">
+          <i data-lucide="users" class="w-6 h-6"></i>
+          <h2 class="text-xl font-bold">Users</h2>
+        </div>
+        <hr class="border-gray-300 dark:border-gray-600 mb-4">
+        <div id="userCards" class="flex flex-col gap-4 max-h-96 overflow-y-auto pr-2">
+          <!-- User cards injected here -->
+        </div>
+      </div>
+
+      <!-- Attendance Panel -->
+      <div class="panel bg-white dark:bg-gray-800 p-6 rounded-2xl shadow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="calendar-check" class="w-6 h-6"></i>
+            <h2 class="text-xl font-bold">Attendance</h2>
+          </div>
+          <button id="deleteAllAttendance" class="text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded">
+            Delete All
+          </button>
+        </div>
+        <hr class="border-gray-300 dark:border-gray-600 mb-4">
+        <div id="attendanceCards" class="flex flex-col gap-4 max-h-96 overflow-y-auto pr-2">
+          <!-- Attendance cards injected here -->
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+    sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
+    sidebarClose.addEventListener('click', () => sidebar.classList.add('-translate-x-full'));
+
+    // Dark mode
+    const html = document.documentElement;
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const darkIcon = document.getElementById('darkIcon');
+    const lightIcon = document.getElementById('lightIcon');
+
+    function updateIcons() {
+      if (html.classList.contains('dark')) {
+        darkIcon.classList.add('hidden');
+        lightIcon.classList.remove('hidden');
+      } else {
+        darkIcon.classList.remove('hidden');
+        lightIcon.classList.add('hidden');
+      }
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+      updateIcons();
+    });
+
+    if (localStorage.getItem('theme') === 'dark') html.classList.add('dark');
+    updateIcons();
+
+    const deleteAllBtn = document.getElementById('deleteAllAttendance');
+
+    deleteAllBtn.addEventListener('click', async () => {
+      if (confirm('Are you sure you want to delete all attendance records?')) {
+        try {
+          const res = await fetch('/delete-all-attendance', { method: 'DELETE' });
+          const data = await res.json();
+          alert(data.message);
+
+          // Clear the attendance cards in the UI
+          document.getElementById('attendanceCards').innerHTML = '<p class="text-gray-500 dark:text-gray-400">No attendance records yet.</p>';
+        } catch (err) {
+          console.error(err);
+          alert('Failed to delete all attendance records.');
+        }
+      }
+    });
+
+    // Fetch Users
+    async function fetchUsers() {
+      try {
+        const res = await fetch('/get-all-profiles');
+        let users = [];
+
+        if (res.ok) {
+          users = await res.json(); // users array
+        } else if (res.status === 404) {
+          users = []; // no users
+        }
+
+        let cards = '';
+
+        if (users.length === 0) {
+          cards = `
+            <div class="text-center text-gray-500 dark:text-gray-300 py-6">
+              No users yet, <a href="add-profile.html" class="text-blue-500 underline">add now</a>
+            </div>
+          `;
+        } else {
+          users.forEach(user => {
+            cards += `
+              <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow flex justify-between items-center">
+                <div>
+                  <p class="font-semibold">${user.name}</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-300">${user.role} - ${user.section_or_staff}</p>
+                </div>
+                <button class="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center delete-btn" data-id="${user.id}">
+                  <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </button>
+              </div>
+            `;
+          });
+        }
+
+        document.getElementById('userCards').innerHTML = cards;
+        lucide.createIcons();
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.dataset.id;
+            if (confirm('Are you sure?')) {
+              const res = await fetch(`/delete-user/${id}`, { method: 'DELETE' });
+              const data = await res.json();
+              alert(data.message);
+              fetchUsers(); // Refresh the list
+            }
+          });
+        });
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Fetch Attendance
+    async function fetchAttendance() {
+      try {
+        const res = await fetch('/get-all-attendance');
+        let records = [];
+
+        if (res.ok) {
+          records = await res.json();
+        } else if (res.status === 404) {
+          records = []; // no attendance records
+        }
+
+        let cards = '';
+
+        if (records.length === 0) {
+          cards = `
+            <div class="text-center text-gray-500 dark:text-gray-400 py-6">
+              No attendance records yet.
+            </div>
+          `;
+        } else {
+          records.forEach(rec => {
+            cards += `
+              <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow flex justify-between items-center">
+                <div>
+                  <p class="font-semibold">${rec.name}</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-300">${rec.date} at ${rec.time}</p>
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        document.getElementById('attendanceCards').innerHTML = cards;
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('attendanceCards').innerHTML = `
+          <div class="text-center text-gray-500 dark:text-gray-400 py-6">
+            Failed to fetch attendance records.
+          </div>
+        `;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchUsers();
+      fetchAttendance();
+    });
+  </script>
+</body>
+</html>

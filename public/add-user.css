@@ -1,0 +1,186 @@
+/* Reset margins, padding, and box-sizing for all elements */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Sidebar styling */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+
+    background: #111;
+
+    color: white;
+    padding: 15px;
+    position: fixed;
+    left: -250px;
+    overflow-y: auto;
+    transition: left 0.3s ease, position 0.3s ease;
+    z-index: 9999;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+    gap: 20px;
+    transition: 0.2s ease-in-out;
+}
+
+.sidebar a:hover {
+    background: #222;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+/* Active sidebar */
+.sidebar.active {
+    left: 0;
+    position: absolute;
+}
+
+/* Content styling */
+.content {
+    flex-grow: 1;
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+    padding-top: 56px; /* Adjusted for navbar height */
+    transition: transform 0.3s ease;
+}
+
+/* Shift content when sidebar is active */
+.content.shift {
+    transform: translateX(250px);
+}
+
+.img-fluid
+{
+    filter: drop-shadow(1px 1px 1px #000);
+}
+
+/* Navbar styling */
+.navbar {
+    background: #111;
+
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 56px; /* Fixed height for navbar */
+    z-index: 1030;
+    transition: position 0.3s ease;
+}
+
+/* Profile Icon Styling */
+.navbar .profile-icon {
+    color: white;
+    font-size: 1.8rem; /* Adjust size if needed */
+    cursor: pointer;
+}
+
+/* Dynamic navbar when sidebar is open */
+.navbar.dynamic {
+    position: relative;
+}
+
+/* Navbar toggler button */
+.navbar-toggler {
+    position: absolute;
+    left: 15px;
+    padding: 10px;
+    font-size: 1.5rem;
+    color: white;
+    background: transparent;
+    border: none;
+    outline: none;
+    transition: left 0.3s ease;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=UTF8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='white' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+
+/* Adjust toggler position when sidebar is active */
+.sidebar.active ~ .navbar .navbar-toggler {
+    left: 265px;
+}
+
+.description
+{
+    text-align: justify;
+}
+
+/* Dark Mode Styles */
+.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+.dark-mode .sidebar {
+    background: #222;
+}
+
+.dark-mode .navbar {
+    background: #222;
+}
+
+.dark-mode .sidebar a {
+    color: #bbb;
+}
+
+.dark-mode .sidebar a:hover {
+    background: #333;
+}
+
+.dark-mode .bg-light {
+    background-color: #333 !important; /* Dark background */
+    color: white !important; /* White text */
+    border-color: #555 !important; /* Darker border */
+}
+
+@media screen and (max-aspect-ratio: 16/9) {
+    /* Adjust sidebar for smaller screens */
+    .sidebar {
+        width: 200px;
+        left: -200px;
+        padding: 10px;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    /* Adjust content shift */
+    .content.shift {
+        transform: translateX(200px);
+    }
+
+    /* Resize navbar toggler */
+    .navbar-toggler {
+        font-size: 1.2rem;
+        left: 10px;
+    }
+
+    .sidebar.active ~ .navbar .navbar-toggler {
+        left: 215px;
+    }
+    .video-container {
+      width: 100%;
+    }
+}
