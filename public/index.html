@@ -19,123 +19,94 @@
   {
     border: 1px solid lightblue;
   }
-
-  /* Allow clicks to pass through by default */
-  #demoOverlay,
-  #paymentMessage {
-    pointer-events: none;
-  }
-
-  /* Only block clicks when showing payment message */
-  #paymentMessage.show {
-    pointer-events: auto;
-  }
-
-  /* Smooth fade-in/out */
-  #paymentMessage {
-    opacity: 0;
-    transition: opacity 1s;
-  }
 </style>
 <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
-    <div id="mainContent">
-      <!-- Navbar -->
-      <nav class="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-4 shadow-md">
-        <div class="flex items-center gap-4">
-          <button id="sidebarToggle" class="md:hidden focus:outline-none">
-            <i data-lucide="menu" class="w-6 h-6"></i>
-          </button>
-          <span class="font-bold text-lg">My Dashboard</span>
-        </div>
-        <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
-          <i data-lucide="sun" id="lightIcon" class="w-5 h-5 hidden"></i>
-          <i data-lucide="moon" id="darkIcon" class="w-5 h-5"></i>
-        </button>
-      </nav>
+  <!-- Navbar -->
+  <nav class="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-4 shadow-md">
+    <div class="flex items-center gap-4">
+      <button id="sidebarToggle" class="md:hidden focus:outline-none">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+      <span class="font-bold text-lg">My Dashboard</span>
+    </div>
+    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+      <i data-lucide="sun" id="lightIcon" class="w-5 h-5 hidden"></i>
+      <i data-lucide="moon" id="darkIcon" class="w-5 h-5"></i>
+    </button>
+  </nav>
 
-      <div class="flex">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 bg-gray-200 dark:bg-gray-800 w-64 p-4 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-lg font-bold">Menu</h2>
-            <button id="sidebarClose" class="md:hidden focus:outline-none">
-              <i data-lucide="x" class="w-5 h-5"></i>
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 bg-gray-200 dark:bg-gray-800 w-64 p-4 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-bold">Menu</h2>
+        <button id="sidebarClose" class="md:hidden focus:outline-none">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <ul class="space-y-4">
+        <li>
+          <a href="index.html" class="flex items-center gap-2 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
+            <i data-lucide="scan" class="w-5 h-5"></i> Scan
+          </a>
+        </li>
+        <li>
+          <a href="login-dashboard.html" class="flex items-center gap-2 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
+            <i data-lucide="user-circle" class="w-5 h-5"></i> Admin Dashboard
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main content -->
+    <main id="content" class="flex-1 ml-0 md:ml-64 p-6 transition-all duration-300">
+      <!-- Panels Row -->
+      <div class="flex flex-col md:flex-row gap-6">
+        
+        <!-- Video Scanner Panel -->
+        <div class="panel bg-white dark:bg-gray-800 p-6 rounded-2xl shadow flex-1 flex flex-col fade-in">
+          <!-- Title and hr -->
+          <div class="flex items-center mb-4 gap-2">
+            <i data-lucide="video" class="w-6 h-6"></i>
+            <h2 class="text-xl font-bold">Video Scanner</h2>
+          </div>
+          <hr class="border-gray-300 dark:border-gray-600 mb-4">
+
+          <video id="video" autoplay muted class="w-full rounded-lg border-indigo-500"></video>
+          
+          <!-- Buttons Row -->
+          <div class="flex justify-center gap-4 mt-4">
+            <button id="startCameraBtn" class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+              <i data-lucide="play" class="w-5 h-5"></i>
+              Start Camera
+            </button>
+            <button id="stopCameraBtn" class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+              <i data-lucide="stop-circle" class="w-5 h-5"></i>
+              Stop Camera
             </button>
           </div>
 
-          <ul class="space-y-4">
-            <li>
-              <a href="index.html" class="flex items-center gap-2 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
-                <i data-lucide="scan" class="w-5 h-5"></i> Scan
-              </a>
-            </li>
-            <li>
-              <a href="login-dashboard.html" class="flex items-center gap-2 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
-                <i data-lucide="user-circle" class="w-5 h-5"></i> Admin Dashboard
-              </a>
-            </li>
-          </ul>
-        </aside>
+          <p class="mt-3 text-gray-500 dark:text-gray-400 text-center">Scan your face here</p>
+        </div>
 
-        <!-- Main content -->
-        <main id="content" class="flex-1 ml-0 md:ml-64 p-6 transition-all duration-300">
-          <!-- Panels Row -->
-          <div class="flex flex-col md:flex-row gap-6">
-            
-            <!-- Video Scanner Panel -->
-            <div class="panel bg-white dark:bg-gray-800 p-6 rounded-2xl shadow flex-1 flex flex-col fade-in">
-              <!-- Title and hr -->
-              <div class="flex items-center mb-4 gap-2">
-                <i data-lucide="video" class="w-6 h-6"></i>
-                <h2 class="text-xl font-bold">Video Scanner</h2>
-              </div>
-              <hr class="border-gray-300 dark:border-gray-600 mb-4">
-
-              <video id="video" autoplay muted class="w-full rounded-lg border-indigo-500"></video>
-              
-              <!-- Buttons Row -->
-              <div class="flex justify-center gap-4 mt-4">
-                <button id="startCameraBtn" class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
-                  <i data-lucide="play" class="w-5 h-5"></i>
-                  Start Camera
-                </button>
-                <button id="stopCameraBtn" class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
-                  <i data-lucide="stop-circle" class="w-5 h-5"></i>
-                  Stop Camera
-                </button>
-              </div>
-
-              <p class="mt-3 text-gray-500 dark:text-gray-400 text-center">Scan your face here</p>
-            </div>
-
-            <!-- Profile & Attendance Panel -->
-            <div id="profileContainer" class="panel bg-white dark:bg-gray-800 p-6 rounded-2xl shadow flex-1 flex flex-col items-center justify-center gap-4 invisible">
-              <!-- Title and hr -->
-              <div class="flex items-center mb-4 gap-2">
-                <i data-lucide="user" class="w-6 h-6"></i>
-                <h2 class="text-xl font-bold">Profile & Attendance</h2>
-              </div>
-              <hr class="border-gray-300 dark:border-gray-600 mb-4">
-
-              <img id="profileImage" src="user.png" alt="Profile Image" class="w-24 h-24 rounded-full object-cover">
-              <h2 id="profileName" class="text-xl font-semibold"></h2>
-              <p id="attendanceDetails" class="text-gray-600 dark:text-gray-300 text-center"></p>
-            </div>
-
+        <!-- Profile & Attendance Panel -->
+        <div id="profileContainer" class="panel bg-white dark:bg-gray-800 p-6 rounded-2xl shadow flex-1 flex flex-col items-center justify-center gap-4 invisible">
+          <!-- Title and hr -->
+          <div class="flex items-center mb-4 gap-2">
+            <i data-lucide="user" class="w-6 h-6"></i>
+            <h2 class="text-xl font-bold">Profile & Attendance</h2>
           </div>
-        </main>
-    </div>
+          <hr class="border-gray-300 dark:border-gray-600 mb-4">
 
-    <!-- Demo Countdown (bottom-right, transparent) -->
-    <div id="demoOverlay" class="fixed bottom-4 right-4 bg-gray-800/30 dark:bg-gray-200/30 text-white dark:text-gray-900 px-4 py-2 rounded-lg backdrop-blur-sm z-50">
-      Demo Mode: <span id="countdown">02:00</span>
-    </div>
+          <img id="profileImage" src="user.png" alt="Profile Image" class="w-24 h-24 rounded-full object-cover">
+          <h2 id="profileName" class="text-xl font-semibold"></h2>
+          <p id="attendanceDetails" class="text-gray-600 dark:text-gray-300 text-center"></p>
+        </div>
 
-    <!-- Final Payment Message -->
-    <div id="paymentMessage" class="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-center text-2xl font-bold opacity-0 transition-opacity duration-1000 z-50">
-      Please pay to the developer to access it full
-    </div>
+      </div>
+    </main>
 
     <script src="face-api.min.js"></script>
     <script>
@@ -306,39 +277,6 @@
           recognitionStarted = false;
         }
       });
-
-      const mainContent = document.getElementById('mainContent');
-      const countdownEl = document.getElementById('countdown');
-      const demoOverlay = document.getElementById('demoOverlay');
-      const paymentMessage = document.getElementById('paymentMessage');
-
-      let countdownSeconds = 120;
-
-      const countdownInterval = setInterval(() => {
-        const minutes = String(Math.floor(countdownSeconds / 60)).padStart(2, '0');
-        const seconds = String(countdownSeconds % 60).padStart(2, '0');
-        countdownEl.textContent = `${minutes}:${seconds}`;
-
-        // Optional: slightly dim main content (won't block clicks)
-        mainContent.style.opacity = 1 - (120 - countdownSeconds) / 150; // subtle fade
-
-        countdownSeconds--;
-
-        if (countdownSeconds < 0) {
-          clearInterval(countdownInterval);
-
-          // Hide demo overlay
-          demoOverlay.style.display = 'none';
-
-          // Show payment message
-          paymentMessage.classList.add('show');  // now blocks clicks
-          paymentMessage.style.display = 'flex';
-          setTimeout(() => {
-            paymentMessage.style.opacity = 1; // fade in
-          }, 50);
-        }
-      }, 1000);
-
     </script>
 </body>
 </html>
