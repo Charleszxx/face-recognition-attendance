@@ -9,7 +9,6 @@ const axios = require('axios');
 const app = express();
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
-app.use('/models', express.static('models'));
 app.use(express.urlencoded({ extended: true }));
 const db = new sqlite3.Database('./database.db');
 
